@@ -65,7 +65,7 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 3. Configure the Groq API key
+### 3. Configure Groq locally
 
 Get a Groq API key from [console.groq.com](https://console.groq.com/), then add these values to `.env`:
 
@@ -76,13 +76,54 @@ GROQ_MODEL=qwen/qwen3.6-27b
 
 You may also enter the key in the app sidebar. Change `GROQ_MODEL` to any model available in your Groq account. Do not commit API keys to source control.
 
-### 4. Start the app
+### 4. Start the app locally
 
 ```powershell
 streamlit run main.py
 ```
 
 Open the local URL printed by Streamlit, upload a resume PDF, and click **Analyse Resume**.
+
+## Deploy on Streamlit Community Cloud
+
+Streamlit Community Cloud has a free tier and deploys directly from GitHub.
+
+### 1. Push the project to GitHub
+
+Create an empty GitHub repository, then run these commands from the project folder:
+
+```powershell
+git add main.py requirements.txt README.md .gitignore .streamlit/secrets.toml.example
+git commit -m "Prepare resume analyser for Streamlit Cloud"
+git branch -M main
+git push -u origin main
+```
+
+This checkout already has an `origin` remote. For a new checkout, run `git remote add origin https://github.com/<your-username>/<your-repository>.git` before the push command.
+
+Before pushing, verify that no secret file is staged:
+
+```powershell
+git status --short
+git check-ignore .env .streamlit/secrets.toml
+```
+
+The `.gitignore` excludes local environments, caches, `.env`, and Streamlit's real secrets file. Keep `.streamlit/secrets.toml.example` in GitHub as a safe template.
+
+### 2. Create the Streamlit Cloud app
+
+1. Sign in at [share.streamlit.io](https://share.streamlit.io/) with GitHub.
+2. Select **Create app**, choose the repository and `main` branch, and set the main file to `main.py`.
+3. Open **Advanced settings**, select Python 3.11 or newer, and add these secrets:
+
+```toml
+GROQ_API_KEY = "your-api-key"
+GROQ_MODEL = "qwen/qwen3.6-27b"
+```
+
+4. Click **Deploy**. After deployment, open the generated `streamlit.app` URL and upload a text-based PDF.
+
+The app reads Streamlit Cloud secrets in deployment and `.env` values when running locally. Never paste the API key into committed files or the README.
 
 ## Notes
 

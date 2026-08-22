@@ -7,7 +7,18 @@ from pypdf import PdfReader
 from dotenv import load_dotenv
 
 load_dotenv()
-MODEL_NAME = os.getenv("GROQ_MODEL", "qwen/qwen3.6-27b")
+
+
+def get_config_value(name: str, default: str = "") -> str:
+    """Read Streamlit Cloud secrets, then local environment variables."""
+    try:
+        secret_value = st.secrets.get(name)
+    except (FileNotFoundError, KeyError):
+        secret_value = None
+    return secret_value or os.getenv(name, default)
+
+
+MODEL_NAME = get_config_value("GROQ_MODEL", "qwen/qwen3.6-27b")
 
 st.set_page_config(
     page_title="Resume Analyser",
@@ -22,9 +33,9 @@ with st.sidebar:
     st.header("Configuration")
     api_key = st.text_input(
         "Groq API key",
-        value=os.getenv("GROQ_API_KEY", ""),
+        value=get_config_value("GROQ_API_KEY"),
         type="password",
-        help="You can also set the GROQ_API_KEY environment variable in .env.",
+        help="Set GROQ_API_KEY in Streamlit Cloud Secrets or your local .env file.",
     )
     st.caption(f"Model: {MODEL_NAME}")
 
